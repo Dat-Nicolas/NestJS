@@ -14,10 +14,9 @@ export class AuthController {
     return this.authService.signIn(dto.username, dto.password);
   }
 
-  // nếu muốn mở đăng ký:
-  @Post('register')
-  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
-  register(@Body() dto: RegisterAuthDto) {
-    return this.authService.register(dto.email, dto.password, dto.fullName);
-  }
+  // @Post('register')
+  // @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  // register(@Body() dto: RegisterAuthDto) {
+  //   return this.authService.register(dto.email, dto.password, dto.fullName);
+  // }
 }

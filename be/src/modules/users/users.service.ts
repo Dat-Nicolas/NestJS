@@ -22,7 +22,7 @@ export class UsersService {
       throw new BadRequestException(`Email ${email} đã tồn tại, vui lòng nhập email khác`);
     }
 
-    const hashedPassword = hashPasswordHelper(password); 
+    const hashedPassword = await  hashPasswordHelper(password); 
     const user = await this.userModel.create({
       name,
       email,

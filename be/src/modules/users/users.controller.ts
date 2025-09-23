@@ -25,8 +25,8 @@ async create(@Body() createUserDto: CreateUserDto) {
   }
 
   @Get(':id')
-  findOne(@Param('_id') id: string) {
-    return this.usersService.findOne(_id);
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(+id);
   }
 
   @Patch()
