@@ -70,7 +70,12 @@ export class UsersService {
       .skip(skip)
       .select('-email')
       .sort(sort as any);
-    return { results, totalPages };
+    return { results, meta :{
+      current:current,
+      pageSize:pageSize,
+      pages:totalPages,
+      totol:totalItems
+    } };
   }
 
   findOne(id: number) {
