@@ -5,8 +5,8 @@ import { LoginAuthDto } from './dto/login-auth.dto';
 import { RegisterAuthDto } from './dto/register-auth.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { LocalAuthGuard } from './passport/local-auth.guard';
-import { Public } from '@/decorator/customize';
-import { CreateAuthDto } from './dto/create-auth.dto';
+import { Public, ResponseMessage } from '@/decorator/customize';
+import { CreateAuthDto, VerifyAuthDto } from './dto/create-auth.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 @Controller('auth')
 export class AuthController {
@@ -18,38 +18,38 @@ export class AuthController {
   @Post('login')
   @Public()
   @UseGuards(LocalAuthGuard)
+  @ResponseMessage("Đăng nhập thành công")
   handleLogin(@Request() req) {
     return this.authService.login(req.user);
   }
 
   @Post('register')
   @Public()
+  @ResponseMessage("Đăng ký thành công")
   register(@Body() registerDto:CreateAuthDto) {
     return  this.authService.handleRegister(registerDto)
   }
 
-  @Get('mail')
+
+  @Post('verify')
   @Public()
-  testmail() {
-    this.mailerService
-      .sendMail({
-        to: 'topchit031@gmail.com', // list of receivers
-        subject: 'Testing Nest MailerModule ✔', // Subject line
-        text: 'welcome', // plaintext body
-        template: "register",
-        context:{
-          name:"topchit",
-          activationCode:53241421
-        }
-      })
-    return  "ok"
+  @ResponseMessage("Xác thực thành công")
+  Verify(@Body() registerDto:VerifyAuthDto) {
+    return  this.authService.Verify(registerDto)
   }
 
+  @Post('re-verify')
+  @Public()
+  @ResponseMessage("Gửi lại mã xác thực thành công")
+  ReVerify(@Body("email") email:string) {
+    return  this.authService.ReVerify(email)
+  }
 
-  // @Get('profile')
-  // getProfile(@Request() req) {
-  //   return req.user;
-  // }
+  @Get('profile')
+  @ResponseMessage("Lấy thông tin người dùng thành công")
+  getProfile(@Request() req) {
+    return req.user;
+  }
 
  
 }

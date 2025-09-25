@@ -12,3 +12,13 @@ export class CreateAuthDto {
   @IsOptional()
   name: string;
 }
+
+
+
+export class VerifyAuthDto {
+  @IsNotEmpty({ message: 'id ko để trống' })
+  _id: string;
+
+  @IsNotEmpty({ message: 'code ko để trống' })
+  code: string;
+}

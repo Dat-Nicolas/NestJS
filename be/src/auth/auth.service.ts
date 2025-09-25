@@ -8,7 +8,7 @@ import { UsersService } from '@/modules/users/users.service';
 import { comparePasswordHelper, hashPasswordHelper } from '@/helper/util';
 import { JwtService } from '@nestjs/jwt';
 import { register } from 'module';
-import { CreateAuthDto } from './dto/create-auth.dto';
+import { CreateAuthDto, VerifyAuthDto } from './dto/create-auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -17,21 +17,36 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-   async validateUser(username: string, pass: string) {
+  async validateUser(username: string, pass: string) {
     const user = await this.usersService.findByEmail(username);
     const isValidPassword = await comparePasswordHelper(pass, user.password);
-    if (!user ||!isValidPassword) return null
+    if (!user || !isValidPassword) return null;
     return user;
-   
   }
 
- async login(user: any) {
-    const payload = { username: user.email, sub: user._id , avatar:user.image ,roles:user.role };
+  async login(user: any) {
+    const payload = {
+      username: user.email,
+      sub: user._id,
+      avatar: user.image,
+      roles: user.role,
+    };
     return {
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+      },
       access_token: this.jwtService.sign(payload),
     };
   }
-  handleRegister = async(registerDto:CreateAuthDto) => {
-    return await this.usersService.handleRegister(registerDto)
-  }
+  handleRegister = async (registerDto: CreateAuthDto) => {
+    return await this.usersService.handleRegister(registerDto);
+  };
+  Verify = async (data: VerifyAuthDto) => {
+    return await this.usersService.handleActive(data);
+  };
+  ReVerify = async (data: string) => {
+    return await this.usersService.ReVerify(data);
+  };
 }
