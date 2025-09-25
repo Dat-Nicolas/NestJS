@@ -8,7 +8,11 @@ import { UsersService } from '@/modules/users/users.service';
 import { comparePasswordHelper, hashPasswordHelper } from '@/helper/util';
 import { JwtService } from '@nestjs/jwt';
 import { register } from 'module';
-import { CreateAuthDto, VerifyAuthDto } from './dto/create-auth.dto';
+import {
+  ChangePasswordAuthDto,
+  CreateAuthDto,
+  VerifyAuthDto,
+} from './dto/create-auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -48,5 +52,11 @@ export class AuthService {
   };
   ReVerify = async (data: string) => {
     return await this.usersService.ReVerify(data);
+  };
+  RePassword = async (data: string) => {
+    return await this.usersService.RePassword(data);
+  };
+  ChangePassword = async (data: ChangePasswordAuthDto) => {
+    return await this.usersService.ChangePassword(data);
   };
 }

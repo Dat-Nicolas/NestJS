@@ -6,7 +6,7 @@ import { RegisterAuthDto } from './dto/register-auth.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { LocalAuthGuard } from './passport/local-auth.guard';
 import { Public, ResponseMessage } from '@/decorator/customize';
-import { CreateAuthDto, VerifyAuthDto } from './dto/create-auth.dto';
+import { ChangePasswordAuthDto, CreateAuthDto, VerifyAuthDto } from './dto/create-auth.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 @Controller('auth')
 export class AuthController {
@@ -43,6 +43,20 @@ export class AuthController {
   @ResponseMessage("Gửi lại mã xác thực thành công")
   ReVerify(@Body("email") email:string) {
     return  this.authService.ReVerify(email)
+  }
+
+  @Post('re-password')
+  @Public()
+  @ResponseMessage("")
+  RePassword(@Body("email") email:string) {
+    return  this.authService.RePassword(email)
+  }
+
+   @Post('change-password')
+  @Public()
+  @ResponseMessage("")
+  ChangePassword(@Body() data:ChangePasswordAuthDto ) {
+    return  this.authService.ChangePassword(data)
   }
 
   @Get('profile')

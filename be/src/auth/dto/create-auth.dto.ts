@@ -14,11 +14,25 @@ export class CreateAuthDto {
 }
 
 
-
 export class VerifyAuthDto {
   @IsNotEmpty({ message: 'id ko để trống' })
   _id: string;
 
   @IsNotEmpty({ message: 'code ko để trống' })
   code: string;
+}
+
+export class ChangePasswordAuthDto {
+
+  @IsNotEmpty({ message: 'code ko để trống' })
+  code: string;
+
+  @IsNotEmpty({ message: 'password ko để trống' })
+  password: string;
+
+  @IsNotEmpty({ message: 'confirmPassword ko để trống' })
+  confirmPassword: string;
+
+  @IsNotEmpty({ message: 'email ko để trống' })
+  email: string;
 }
