@@ -8,7 +8,7 @@ const HomePage = () => {
         <div style={{ padding: 20 }}>
             <Result
                 icon={<CrownOutlined />}
-                title="Fullstack Next/Nest - createdBy @hoidanit"
+                title="Fullstack Next/Nest - createdBy Topchit"
             />
         </div>
     )
