@@ -10,8 +10,13 @@ import mongoose from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
 import { randomUUID } from 'crypto';
+import { MailerService } from '@nestjs-modules/mailer';
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(
+    @InjectModel(User.name)
+    private userModel: Model<User>,
+    private readonly mailerService: MailerService,
+  ) {}
 
   private async isEmailExist(email: string): Promise<boolean> {
     const exists = await this.userModel.exists({ email });
@@ -93,14 +98,25 @@ export class UsersService {
     }
 
     const hashedPassword = await hashPasswordHelper(password);
+    const codeID = randomUUID();
     const user = await this.userModel.create({
       name,
       email,
       password: hashedPassword,
       isActive: false,
-      codeId: randomUUID(),
+      codeId: codeID,
       codeExpired: dayjs().add(1, 'days'),
     });
+
+    this.mailerService.sendMail({
+       to: user.email, 
+        subject: 'Activate your account', 
+        template: "register",
+        context:{
+          name:user.name || user.email,
+          activationCode: codeID
+        }
+    })
     return {
       _id: user._id,
     };
