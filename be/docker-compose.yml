@@ -18,12 +18,16 @@ services:
       REDIS_PORT: 6379
       KAFKA_BROKERS_INTERNAL: kafka:9092
       KAFKA_TOPIC: test-topic
+      ELASTIC_NODE: http://elasticsearch:9200   
+      ELASTIC_INDEX: products  
     depends_on:
       mongodb:
         condition: service_started
       redis:
         condition: service_started
       kafka:
+        condition: service_healthy
+      elasticsearch:                            
         condition: service_healthy
     ports:
       - "8080:8080"
@@ -69,7 +73,7 @@ services:
       - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
       - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=1
     ports:
-      - "9094:9094"   # test từ máy host dùng localhost:9094
+      - "9094:9094"   
     healthcheck:
       test: ["CMD", "bash", "-lc", "echo > /dev/tcp/127.0.0.1/9092"]
       interval: 5s
@@ -88,4 +92,35 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
+    networks: [appnet]
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.1
+    container_name: be-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      appnet:
+        aliases:
+          - elasticsearch            
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.14.1
+    container_name: be-kibana
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
     networks: [appnet]

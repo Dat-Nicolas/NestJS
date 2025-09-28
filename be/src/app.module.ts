@@ -24,6 +24,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
 import { KafkaController } from './kafka/kafka.controller';
 import { KafkaConsumerController } from './kafka/kafka.consumer';
+import { SearchModule } from './search/search.module';
 @Module({
   imports: [
     UsersModule,
@@ -36,6 +37,7 @@ import { KafkaConsumerController } from './kafka/kafka.consumer';
     RestaurantsModule,
     ReviewsModule,
     AuthModule,
+    SearchModule,
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule.forRoot({ isGlobal: true }), AuthModule],
