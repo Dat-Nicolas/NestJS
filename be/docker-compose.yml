@@ -1,21 +1,33 @@
 version: '3.8'
 
+networks:
+  appnet:
+    driver: bridge
+
+volumes:
+  mongodb_data_container:
+
 services:
   api:
     build: .
     container_name: be-api
     env_file:
       - .env
-    ports:
-      - "8080:8080"
-    depends_on:
-      - mongodb
-      - redis
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
-    networks:
-      - appnet
+      KAFKA_BROKERS_INTERNAL: kafka:9092
+      KAFKA_TOPIC: test-topic
+    depends_on:
+      mongodb:
+        condition: service_started
+      redis:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    networks: [appnet]
 
   mongodb:
     image: mongo:5.0.15
@@ -27,8 +39,7 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data_container:/data/db
-    networks:
-      - appnet
+    networks: [appnet]
 
   redis:
     image: redis:7.2
@@ -40,12 +51,41 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
-    networks:
-      - appnet
+    networks: [appnet]
 
-networks:
-  appnet:
-    driver: bridge
+  kafka:
+    image: bitnami/kafka:3.7
+    container_name: be-kafka
+    environment:
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=1
+    ports:
+      - "9094:9094"   # test từ máy host dùng localhost:9094
+    healthcheck:
+      test: ["CMD", "bash", "-lc", "echo > /dev/tcp/127.0.0.1/9092"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    networks: [appnet]
 
-volumes:
-  mongodb_data_container:
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: be-kafka-ui
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=bkav
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+    ports:
+      - "8081:8080"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks: [appnet]

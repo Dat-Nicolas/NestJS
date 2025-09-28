@@ -22,6 +22,8 @@ import { TransformInterceptor } from './core/transform.interceptor';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-store';
+import { KafkaController } from './kafka/kafka.controller';
+import { KafkaConsumerController } from './kafka/kafka.consumer';
 @Module({
   imports: [
     UsersModule,
@@ -70,15 +72,18 @@ import { redisStore } from 'cache-manager-redis-store';
       inject: [ConfigService],
     }),
     ClientsModule.register([
-      {
-        name: 'KAFKA_SERVICE',
-        transport: Transport.KAFKA,
-        options: {
-          client: { brokers: ['localhost:9092'] },
-          consumer: { groupId: 'my-consumer' },
-        },
+  {
+    name: 'KAFKA_SERVICE',
+    transport: Transport.KAFKA,
+    options: {
+      client: {
+        brokers: [process.env.KAFKA_BROKERS_INTERNAL || 'kafka:9092'],
       },
-    ]),
+      consumer: { groupId: 'my-consumer' },
+    },
+  },
+]),
+
     CacheModule.registerAsync({
       isGlobal: true,
       inject: [ConfigService],
@@ -95,7 +100,7 @@ import { redisStore } from 'cache-manager-redis-store';
       }),
     }),
   ],
-  controllers: [AppController],
+  controllers: [AppController, KafkaController, KafkaConsumerController],
   providers: [
     AppService,
     {

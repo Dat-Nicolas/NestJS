@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common/pipes/validation.pipe';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
@@ -20,6 +21,20 @@ async function bootstrap() {
     swaggerOptions: { persistAuthorization: true },
     customSiteTitle: 'API Docs',
   });
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.KAFKA,
+    options: {
+      client: {
+        clientId: 'bkav-server',
+        brokers: [process.env.KAFKA_BROKERS_INTERNAL || 'kafka:9092'],
+      },
+      consumer: {
+        groupId: 'bkav-server-consumer',
+        allowAutoTopicCreation: true,
+      },
+    },
+  });
+  await app.startAllMicroservices();
   await app.listen(port);
 }
 bootstrap();
