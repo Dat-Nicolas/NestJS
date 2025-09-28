@@ -11,14 +11,14 @@ async function bootstrap() {
   app.setGlobalPrefix('api', { exclude: ['/'] });
   const config = new DocumentBuilder()
     .setTitle('API Docs')
-    .setDescription('Bkav API')
+    .setDescription('API')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
   const doc = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, doc, {
     swaggerOptions: { persistAuthorization: true },
-    customSiteTitle: 'Bkav API Docs',
+    customSiteTitle: 'API Docs',
   });
   await app.listen(port);
 }

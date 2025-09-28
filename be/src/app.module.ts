@@ -19,6 +19,9 @@ import { JwtAuthGuard } from './auth/passport/jwt-auth.guard';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { TransformInterceptor } from './core/transform.interceptor';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-store';
 @Module({
   imports: [
     UsersModule,
@@ -65,6 +68,31 @@ import { TransformInterceptor } from './core/transform.interceptor';
         },
       }),
       inject: [ConfigService],
+    }),
+    ClientsModule.register([
+      {
+        name: 'KAFKA_SERVICE',
+        transport: Transport.KAFKA,
+        options: {
+          client: { brokers: ['localhost:9092'] },
+          consumer: { groupId: 'my-consumer' },
+        },
+      },
+    ]),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      inject: [ConfigService],
+      useFactory: async (cfg: ConfigService) => ({
+        store: await redisStore({
+          socket: {
+            host: cfg.get('REDIS_HOST') ?? '127.0.0.1',
+            port: Number(cfg.get('REDIS_PORT') ?? 6379),
+          },
+          password: cfg.get('REDIS_PASSWORD') || undefined,
+          ttl: 30_000, // ms – TTL mặc định (30s)
+        }),
+        // max: 0 // Redis là remote store, không cần LRU local
+      }),
     }),
   ],
   controllers: [AppController],
