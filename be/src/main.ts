@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common/pipes/validation.pipe';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
@@ -34,6 +35,11 @@ async function bootstrap() {
       },
     },
   });
+  app.enableCors({
+    origin: ['http://localhost:4001', 'http://localhost:5173'],       
+    credentials: true,
+  });
+  app.useWebSocketAdapter(new IoAdapter(app));
   await app.startAllMicroservices();
   await app.listen(port);
 }
