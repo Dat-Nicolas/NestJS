@@ -25,7 +25,7 @@ import { redisStore } from 'cache-manager-redis-store';
 import { KafkaController } from './kafka/kafka.controller';
 import { KafkaConsumerController } from './kafka/kafka.consumer';
 import { SearchModule } from './search/search.module';
-import { ChatGateway } from './chat/chat.gateway';
+import { ChatModule } from './chat/chat.module';
 @Module({
   imports: [
     UsersModule,
@@ -39,7 +39,7 @@ import { ChatGateway } from './chat/chat.gateway';
     ReviewsModule,
     AuthModule,
     SearchModule,
-    ChatGateway,
+    ChatModule,
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule.forRoot({ isGlobal: true }), AuthModule],
