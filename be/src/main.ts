@@ -6,15 +6,20 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { ServerOptions } from 'socket.io';
-
-
-
+import helmet from 'helmet'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
   const port = configService.get('PORT');
+  
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true , transform : true }));
   app.setGlobalPrefix('api', { exclude: ['/'] });
+  app.use(
+  helmet({
+    contentSecurityPolicy: false, // tắt CSP đang ở dev
+    crossOriginEmbedderPolicy: false,
+  })
+);
   const config = new DocumentBuilder()
     .setTitle('API Docs')
     .setDescription('API')

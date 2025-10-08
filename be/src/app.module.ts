@@ -76,17 +76,17 @@ import { ChatModule } from './chat/chat.module';
       inject: [ConfigService],
     }),
     ClientsModule.register([
-  {
-    name: 'KAFKA_SERVICE',
-    transport: Transport.KAFKA,
-    options: {
-      client: {
-        brokers: [process.env.KAFKA_BROKERS_INTERNAL || 'kafka:9092'],
+      {
+        name: 'KAFKA_SERVICE',
+        transport: Transport.KAFKA,
+        options: {
+          client: {
+            brokers: [process.env.KAFKA_BROKERS_INTERNAL || 'kafka:9092'],
+          },
+          consumer: { groupId: 'my-consumer' },
+        },
       },
-      consumer: { groupId: 'my-consumer' },
-    },
-  },
-]),
+    ]),
 
     CacheModule.registerAsync({
       isGlobal: true,
@@ -103,6 +103,26 @@ import { ChatModule } from './chat/chat.module';
         // max: 0 // Redis là remote store, không cần LRU local
       }),
     }),
+    
+    //  GraphQLModule.forRoot<ApolloDriverConfig>({
+    //   driver: ApolloDriver,
+    //   autoSchemaFile: join(process.cwd(), 'src/schema.gql'), // code-first: tự sinh schema
+    //   sortSchema: true,
+    //   playground: true, // tắt ở prod nếu cần
+    //   subscriptions: {
+    //     // dùng graphql-ws (chuẩn mới)
+    //     'graphql-ws': true,
+    //   },
+    //   context: ({ req, connectionParams }) => {
+    //     // nhét user vào context (JWT ở HTTP/WS)
+    //     const authHeader = req?.headers?.authorization ?? connectionParams?.Authorization ?? connectionParams?.authorization;
+    //     return { authHeader };
+    //   },
+    //   cors: {
+    //     origin: ['http://localhost:4001', 'http://localhost:5173'],
+    //     credentials: true,
+    //   },
+    // }),
   ],
   controllers: [AppController, KafkaController, KafkaConsumerController],
   providers: [

@@ -13,4 +13,6 @@ export class AppController {
   handleOrderCreated(@Payload() message: any) {
     console.log('Order Created:', message.value);
   }
+  // @Get('health')
+  // health() { return { ok: true }; }
 }
